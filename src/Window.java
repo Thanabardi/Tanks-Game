@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -11,16 +13,21 @@ import java.util.Observer;
 
 public class Window extends JFrame implements Observer {
 
-    private int size = 500;
+    private int size = 800;
+    private long delayed = 100;
     private World world;
     private Renderer renderer;
     private Gui gui;
+
+    private List<Integer> keyCode = new ArrayList<Integer>();
+    private List<Integer> keyList = List.of(KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE);
 
     List<Command> replays = new ArrayList<Command>();
 
     public Window() {
         super();
-        addKeyListener(new Controller());
+        addKeyListener(new KeyController());
+        // addMouseListener(new MouseController());
         setLayout(new BorderLayout());
         renderer = new Renderer();
         add(renderer, BorderLayout.CENTER);
@@ -37,6 +44,7 @@ public class Window extends JFrame implements Observer {
     public void update(Observable o, Object arg) {
         renderer.repaint();
         gui.updateTick(world.getTick());
+        moveCommand();
 
         for (Command c: replays){
             if (c.getTick() == world.getTick()){
@@ -46,6 +54,15 @@ public class Window extends JFrame implements Observer {
         if(world.isGameOver()) {
             gui.showGameOverLabel();
             gui.enableReplayButton();
+        }
+        waitFor(delayed);
+    }
+
+    private void waitFor(long delayed) {
+        try {
+            Thread.sleep(delayed);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -61,6 +78,7 @@ public class Window extends JFrame implements Observer {
             paintGrids(g);
             paintPlayer(g);
             paintEnemies(g);
+            paintBullets(g);
         }
 
         private void paintGrids(Graphics g) {
@@ -92,6 +110,16 @@ public class Window extends JFrame implements Observer {
                 int x = e.getX();
                 int y = e.getY();
                 g.fillRect(x * perCell,y * perCell,perCell, perCell);
+            }
+        }
+
+        private void paintBullets(Graphics g) {
+            int perCell = size/world.getSize();
+            g.setColor(Color.black);
+            for(Bullet b : world.getBullets()) {
+                int x = b.getX();
+                int y = b.getY();
+                g.fillOval(x * perCell+5,y * perCell+5,perCell-10, perCell-10);
             }
         }
     }
@@ -147,29 +175,49 @@ public class Window extends JFrame implements Observer {
         }
     }
 
-    class Controller extends KeyAdapter {
+    class KeyController extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            if(e.getKeyCode() == KeyEvent.VK_UP) {
+            if (keyList.contains(e.getKeyCode()) && !keyCode.contains(e.getKeyCode())) {
+                keyCode.add(e.getKeyCode());
+            }
+        }
+
+        public void keyReleased(KeyEvent e) {
+            if(keyCode.contains(e.getKeyCode())) {
+                keyCode.remove(Integer.valueOf(e.getKeyCode()));
+            }
+        }
+    }
+
+    // class MouseController extends MouseAdapter {
+    //     @Override
+    //     public void mousePressed(MouseEvent e) {
+    //         System.out.println(e.getX() + " " +e.getY());
+    //     }
+    // }
+
+    public void moveCommand() {
+        for(Integer key : keyCode) {
+            if(key == KeyEvent.VK_W) {
                 Command c = new CommandTurnNorth(world.getPlayer(), world.getTick());
                 c.execute();
                 replays.add(c);
-            } else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
+            } else if(key == KeyEvent.VK_S) {
                 Command c = new CommandTurnSouth(world.getPlayer(), world.getTick());
                 c.execute();
                 replays.add(c);
-            } else if(e.getKeyCode() == KeyEvent.VK_LEFT) {
+            } else if(key == KeyEvent.VK_A) {
                 Command c = new CommandTurnWest(world.getPlayer(), world.getTick());
                 c.execute();
                 replays.add(c);
-            } else if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
+            } else if(key == KeyEvent.VK_D) {
                 Command c = new CommandTurnEast(world.getPlayer(), world.getTick());
                 c.execute();
                 replays.add(c);
-            } else if(e.getKeyCode() == KeyEvent.VK_Z){
-                Command c = new CommandTeleport(world.getPlayer(), world.getTick(), world.getSize());
-                c.execute();
-                replays.add(c);
+            }
+            if(key == KeyEvent.VK_SPACE){
+                world.burstBullets();
             }
         }
     }

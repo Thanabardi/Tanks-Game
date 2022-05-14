@@ -11,6 +11,6 @@ public class CommandTeleport extends Command{
     @Override
     public void execute() {
         getPlayer().reset();
-        getPlayer().setPosition(this.size/2, this.size/2);
+        // getPlayer().setPosition(this.size/2, this.size/2);
     }
 }
