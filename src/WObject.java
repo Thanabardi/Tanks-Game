@@ -45,30 +45,30 @@ public abstract class WObject {
         this.y += this.dy;
     }
 
-    public void moveStalkerEnermy(int disX, int disY, int tick) {
-        // if (tick % 3 == 0) {
-        //     if (this.x < disX && this.y < disY) {
-        //         this.x += 1;
-        //         this.y += 1;
-        //     } else if (this.x < disX && this.y > disY) {
-        //         this.x += 1;
-        //         this.y -= 1;
-        //     } else if (this.x > disX && this.y < disY) {
-        //         this.x -= 1;
-        //         this.y += 1;
-        //     } else if (this.x > disX && this.y > disY) {
-        //         this.x -= 1;
-        //         this.y -= 1;
-        //     } else if (this.x == disX && this.y > disY) {
-        //         this.y -= 1;
-        //     } else if (this.x == disX && this.y < disY) {
-        //         this.y += 1;
-        //     } else if (this.x > disX && this.y == disY) {
-        //         this.x -= 1;
-        //     } else if (this.x < disX && this.y == disY) {
-        //         this.x += 1;
-        //     } 
-        // }
+    public void moveEnermyA(int disX, int disY, int tick) {
+        if (tick % 4 == 0) {
+            if (this.x < disX-5 && this.y < disY-5) {
+                this.x += 1;
+                this.y += 1;
+            } else if (this.x < disX-5 && this.y > disY+5) {
+                this.x += 1;
+                this.y -= 1;
+            } else if (this.x > disX+5 && this.y < disY-5) {
+                this.x -= 1;
+                this.y += 1;
+            } else if (this.x > disX+5 && this.y > disY+5) {
+                this.x -= 1;
+                this.y -= 1;
+            } else if (this.x == disX && this.y > disY+5) {
+                this.y -= 1;
+            } else if (this.x == disX && this.y < disY-5) {
+                this.y += 1;
+            } else if (this.x > disX+5 && this.y == disY) {
+                this.x -= 1;
+            } else if (this.x < disX-5 && this.y == disY) {
+                this.x += 1;
+            } 
+        }
     }
 
     public int getX() {

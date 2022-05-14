@@ -7,13 +7,13 @@ public class World extends Observable {
 
     private int tick;
     private int size;
+    private int initEnemy = 2;
 
     private List<Bullet> bullets;
     private BulletPool bulletPool;
     private Player player;
     private Thread thread;
     private boolean notOver;
-    private int enemyCount = 10;
     private List<Enemy> enemies;
     private List<Enemy> enemiesStart;
 
@@ -28,6 +28,10 @@ public class World extends Observable {
         enemiesStart = new ArrayList<Enemy>();
         bullets = new ArrayList<Bullet>();
         bulletPool = new BulletPool();
+        createEnemy(initEnemy);
+    }
+    
+    private void createEnemy(int enemyCount) {
         Random random = new Random();
         for(int i = 0; i < enemyCount; i++) {
             int x = random.nextInt(size);
@@ -35,7 +39,6 @@ public class World extends Observable {
             enemies.add(new Enemy(x, y, 0, 0));
             enemiesStart.add(new Enemy(x, y, 0, 0));
         }
-        // enemies[enemies.length] = new Enemy((size/2), (size/2)+2);
     }
 
     public void start() {
@@ -51,14 +54,9 @@ public class World extends Observable {
             public void run() {
                 while(notOver) {
                     tick++;
-                    if(player.getdX() != 0 || player.getdY() != 0) {
-                        bulletdX = player.getdX();
-                        bulletdY = player.getdY();
-                    }
+                    updateBulletDis();
                     player.move();
-                    for(int i = 0; i < enemies.size(); i++) {
-                        enemies.get(i).moveStalkerEnermy(player.getX(), player.getY(), tick);
-                    }
+                    moveEnermy();
                     moveBullets();
                     bulletHit();
                     cleanupBullets();
@@ -69,6 +67,19 @@ public class World extends Observable {
             }
         };
         thread.start();
+    }
+
+    private void moveEnermy() {
+        for(int i = 0; i < enemies.size(); i++) {
+            enemies.get(i).moveEnermyA(player.getX(), player.getY(), tick);
+        }
+    }
+
+    private void updateBulletDis() {
+        if(player.getdX() != 0 || player.getdY() != 0) {
+            bulletdX = player.getdX();
+            bulletdY = player.getdY();
+        }
     }
 
     private void bulletHit() {
@@ -82,6 +93,10 @@ public class World extends Observable {
         }
         for(Enemy enemy : toRemove) {
             enemies.remove(enemy );
+        }
+        if(enemies.size() == 0) {
+            initEnemy += 2;
+            createEnemy(initEnemy);
         }
     }
 
