@@ -62,7 +62,7 @@ public abstract class WObject {
                 this.x -= 1;
             } else if (this.x < disX && this.y == disY) {
                 this.x += 1;
-            } 
+            }
         }
     }
 

@@ -11,10 +11,11 @@ import java.util.Observer;
 
 public class Window extends JFrame implements Observer {
 
-    private int size = 500;
+    private int size = 700;
     private World world;
     private Renderer renderer;
     private Gui gui;
+    private int worldSize = 26;
 
     List<Command> replays = new ArrayList<Command>();
 
@@ -26,9 +27,10 @@ public class Window extends JFrame implements Observer {
         add(renderer, BorderLayout.CENTER);
         gui = new Gui();
         add(gui, BorderLayout.SOUTH);
-        world = new World(25);
+        world = new World(worldSize);
         world.addObserver(this);
-        setSize(size, size);
+        setSize(size, size + 50);
+//        setResizable(false);
         setAlwaysOnTop(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
@@ -50,30 +52,47 @@ public class Window extends JFrame implements Observer {
     }
 
     class Renderer extends JPanel {
+        public final Image imageGrass;
+        public final Image imageBrick;
 
         public Renderer() {
             setDoubleBuffered(true);
+
+            imageGrass = new ImageIcon("imgs/grass.png").getImage();
+            imageBrick = new ImageIcon("imgs/brick.png").getImage();
         }
 
         @Override
         public void paint(Graphics g) {
             super.paint(g);
             paintGrids(g);
-            paintPlayer(g);
-            paintEnemies(g);
+//            paintPlayer(g);
+//            paintEnemies(g);
+            paintGlass(g);
+            paintBricks(g);
         }
 
         private void paintGrids(Graphics g) {
-            // Background
             g.setColor(Color.lightGray);
             g.fillRect(0, 0, size, size);
+        }
 
-            // Lines
-            g.setColor(Color.black);
-            int perCell = size/world.getSize();
-            for(int i = 0; i < world.getSize(); i++) {
-                g.drawLine(i * perCell, 0, i * perCell, size);
-                g.drawLine(0, i * perCell, size, i * perCell);
+        private void paintGlass(Graphics g) {
+            int perCell = size / world.getSize();
+            for (Grass grass : world.getGrasses()) {
+                int x = grass.getX();
+                int y = grass.getY();
+                g.drawImage(imageGrass, x * perCell, y * perCell, perCell, perCell, null, null);
+            }
+        }
+
+        private void paintBricks(Graphics g) {
+            int perCell = size / world.getSize();
+            for (Brick b : world.getBricks()) {
+                int x = b.getX();
+                int y = b.getY();
+                g.setColor(Color.blue);
+                g.drawImage(imageBrick, x * perCell, y * perCell, perCell, perCell, null, null);
             }
         }
 
@@ -81,8 +100,8 @@ public class Window extends JFrame implements Observer {
             int perCell = size/world.getSize();
             int x = world.getPlayer().getX();
             int y = world.getPlayer().getY();
-            g.setColor(Color.green);
-            g.fillRect(x * perCell,y * perCell,perCell, perCell);
+            g.setColor(Color.blue);
+            g.fillRect(x * perCell,y * perCell, perCell, perCell);
         }
 
         private void paintEnemies(Graphics g) {
