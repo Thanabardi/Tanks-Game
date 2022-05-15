@@ -29,7 +29,7 @@ public class Window extends JFrame implements Observer {
         add(gui, BorderLayout.SOUTH);
         world = new World(worldSize);
         world.addObserver(this);
-        setSize(size, size + 50);
+        setSize(size - 9, size + 52);
 //        setResizable(false);
         setAlwaysOnTop(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -54,12 +54,16 @@ public class Window extends JFrame implements Observer {
     class Renderer extends JPanel {
         public final Image imageGrass;
         public final Image imageBrick;
+        public final Image imageSteel;
+        public final Image imageFlag;
 
         public Renderer() {
             setDoubleBuffered(true);
 
-            imageGrass = new ImageIcon("imgs/grass.png").getImage();
+            imageGrass = new ImageIcon("imgs/grass.jpg").getImage();
             imageBrick = new ImageIcon("imgs/brick.png").getImage();
+            imageSteel = new ImageIcon("imgs/steel.jpg").getImage();
+            imageFlag = new ImageIcon("imgs/flag.png").getImage();
         }
 
         @Override
@@ -70,6 +74,8 @@ public class Window extends JFrame implements Observer {
 //            paintEnemies(g);
             paintGlass(g);
             paintBricks(g);
+            paintSteel(g);
+            paintFlag(g);
         }
 
         private void paintGrids(Graphics g) {
@@ -91,9 +97,24 @@ public class Window extends JFrame implements Observer {
             for (Brick b : world.getBricks()) {
                 int x = b.getX();
                 int y = b.getY();
-                g.setColor(Color.blue);
                 g.drawImage(imageBrick, x * perCell, y * perCell, perCell, perCell, null, null);
             }
+        }
+
+        private void paintSteel(Graphics g) {
+            int perCell = size / world.getSize();
+            for (Steel s : world.getSteels()) {
+                int x = s.getX();
+                int y = s.getY();
+                g.drawImage(imageSteel, x * perCell, y * perCell, perCell, perCell, null, null);
+            }
+        }
+
+        private void paintFlag(Graphics g) {
+            int perCell = size / world.getSize();
+            int x = world.getFlag().getX();
+            int y = world.getFlag().getY();
+            g.drawImage(imageFlag, x * perCell, y * perCell, perCell * 2, perCell * 2, null, null);
         }
 
         private void paintPlayer(Graphics g) {

@@ -60,6 +60,16 @@ public class World extends Observable {
             { 24, 4 }, { 24, 5 }, { 24, 11 }, { 24, 14 },
             { 25, 11 }, { 25, 14 }
     };
+    private int[][] steelPosition = {
+            { 6, 2 }, { 6, 3 }, { 6, 24 }, { 6, 25 },
+            { 7, 2 }, { 7, 24 }, { 7, 25 },
+            { 8, 12 }, { 8, 13 }, { 8, 20 },
+            { 9, 20 },
+            { 11, 8 }, { 11, 9 },
+            { 14, 1 }, { 14, 2 }, { 14, 3 },
+            { 15, 1 },
+            { 17, 10 }, { 17, 11 }
+    };
     private Player player;
     private Thread thread;
     private boolean notOver;
@@ -70,10 +80,13 @@ public class World extends Observable {
 
     private Grass[] grasses;
     private Brick[] bricks;
+    private Steel[] steels;
+    private Flag flag;
 
     public World(int size) {
         this.size = size;
         tick = 0;
+        flag = new Flag(12, 24);
         player = new Player(0, 0);
         enemies = new Enemy[enemyCount];
         enemiesStart = new Enemy[enemyCount];
@@ -86,11 +99,13 @@ public class World extends Observable {
         }
         initTrees();
         initBricks();
+        initSteels();
     }
 
     public void start() {
         player.reset();
         player.setPosition(size / 2, size / 2);
+        flag.setPosition(12, 24);
         for (int i = 0; i < enemies.length; i++) {
             enemies[i].setPosition(enemiesStart[i].getX(), enemiesStart[i].getY());
         }
@@ -99,6 +114,9 @@ public class World extends Observable {
         }
         for (int k = 0; k < bricks.length; k++) {
             bricks[k].setPosition(bricks[k].getX(), bricks[k].getY());
+        }
+        for (int l = 0; l < steels.length; l++) {
+            steels[l].setPosition(steels[l].getX(), steels[l].getY());
         }
         tick = 0;
         notOver = true;
@@ -132,6 +150,13 @@ public class World extends Observable {
         bricks = new Brick[brickPosition.length];
         for (int i = 0; i < brickPosition.length; i++) {
             bricks[i] = new Brick(brickPosition[i][1], brickPosition[i][0]);
+        }
+    }
+
+    public void initSteels() {
+        steels = new Steel[steelPosition.length];
+        for (int i = 0; i < steelPosition.length; i++) {
+            steels[i] = new Steel(steelPosition[i][1], steelPosition[i][0]);
         }
     }
 
@@ -193,5 +218,13 @@ public class World extends Observable {
 
     public Brick[] getBricks() {
         return bricks;
+    }
+
+    public Steel[] getSteels() {
+        return steels;
+    }
+
+    public Flag getFlag() {
+        return flag;
     }
 }
