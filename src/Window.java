@@ -55,7 +55,7 @@ public class Window extends JFrame implements Observer {
         }
         if(world.isGameOver()) {
             gui.showGameOverLabel();
-            gui.enableReplayButton();
+            // gui.enableReplayButton();
         }
         waitFor(delayed);
     }
@@ -87,14 +87,14 @@ public class Window extends JFrame implements Observer {
         public void paint(Graphics g) {
             super.paint(g);
             paintGrids(g);
-            paintPlayer(g);
-            paintEnemies(g);
+            paintFlag(g);
             paintBullets1(g);
             paintBullets2(g);
-            paintGlass(g);
+            paintGrass(g);
             paintBricks(g);
             paintSteel(g);
-            paintFlag(g);
+            paintPlayer(g);
+            paintEnemies(g);
         }
 
         private void paintGrids(Graphics g) {
@@ -102,7 +102,7 @@ public class Window extends JFrame implements Observer {
             g.fillRect(0, 0, size, size);
         }
 
-        private void paintGlass(Graphics g) {
+        private void paintGrass(Graphics g) {
             int perCell = size / world.getSize();
             for (Grass grass : world.getGrasses()) {
                 int x = grass.getX();
@@ -178,35 +178,45 @@ public class Window extends JFrame implements Observer {
     class Gui extends JPanel {
 
         private JLabel tickLabel;
-        private JButton startButton;
-        private JButton replayButton;
+        private JButton pveButton;
+        private JButton pvpButton;
         private JLabel gameOverLabel;
 
         public Gui() {
             setLayout(new FlowLayout());
             tickLabel = new JLabel("Tick: 0");
             add(tickLabel);
-            startButton = new JButton("Start");
-            startButton.addActionListener(new ActionListener() {
+            pvpButton = new JButton("PvP");
+            pvpButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    world.start();
-                    startButton.setEnabled(false);
+                    world.startpvp();
+                    pvpButton.setEnabled(false);
                     Window.this.requestFocus();
                 }
             });
-            add(startButton);
-            replayButton = new JButton("Replay");
-            replayButton.addActionListener(new ActionListener() {
+            add(pvpButton);
+            pveButton = new JButton("Survival");
+            pveButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    world.start();
-                    replayButton.setEnabled(false);
+                    world.startpve();
+                    pveButton.setEnabled(false);
                     Window.this.requestFocus();
                 }
             });
-            replayButton.setEnabled(false);
-            add(replayButton);
+            add(pveButton);
+            // replayButton = new JButton("Replay");
+            // replayButton.addActionListener(new ActionListener() {
+            //     @Override
+            //     public void actionPerformed(ActionEvent e) {
+            //         world.start();
+            //         replayButton.setEnabled(false);
+            //         Window.this.requestFocus();
+            //     }
+            // });
+            // replayButton.setEnabled(false);
+            // add(replayButton);
             gameOverLabel = new JLabel("GAME OVER");
             gameOverLabel.setForeground(Color.red);
             gameOverLabel.setVisible(false);
@@ -221,9 +231,9 @@ public class Window extends JFrame implements Observer {
             gameOverLabel.setVisible(true);
         }
 
-        public void enableReplayButton() {
-            replayButton.setEnabled(true);
-        }
+        // public void enableReplayButton() {
+        //     replayButton.setEnabled(true);
+        // }
     }
 
     class KeyController extends KeyAdapter {

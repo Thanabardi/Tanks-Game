@@ -7,7 +7,7 @@ public class World extends Observable {
 
     private int tick;
     private int size;
-    private int enemyCount = 2;
+    private int enemyCount = 4;
     private int enemyHealth = 2;
 
     private List<Bullet> bullets1;
@@ -82,14 +82,13 @@ public class World extends Observable {
     private Thread thread;
     private boolean notOver;
     private List<Enemy> enemies;
-    private List<Enemy> enemiesStart;
 
     private int bulletdX = 0;
     private int bulletdY = -1;
 
-    private Grass[] grasses;
-    private Brick[] bricks;
-    private Steel[] steels;
+    private List<Grass> grasses;
+    private List<Brick> bricks;
+    private List<Steel> steels;
     private Flag flag;
 
     public World(int size) {
@@ -99,43 +98,66 @@ public class World extends Observable {
         
         player = new Player(size/2, size/2, 0, 0, 4);
         enemies = new ArrayList<Enemy>();
-        enemiesStart = new ArrayList<Enemy>();
 
         bullets1 = new ArrayList<Bullet>();
         bullets2 = new ArrayList<Bullet>();
         bulletPool = new BulletPool();
 
-        createEnemy(enemyCount);
         initTrees();
         initBricks();
         initSteels();
+        createEnemy(enemyCount);
+    }
+
+    public void initTrees() {
+        grasses = new ArrayList<Grass>();
+        for (int i = 0; i < treePosition.length; i++) {
+            grasses.add(new Grass(treePosition[i][1], treePosition[i][0], 0, 0, 1));
+        }
+    }
+
+    public void initBricks() {
+        bricks = new ArrayList<Brick>();
+        for (int i = 0; i < brickPosition.length; i++) {
+            bricks.add(new Brick(brickPosition[i][1], brickPosition[i][0], 0, 0, 1));
+        }
+    }
+
+    public void initSteels() {
+        steels = new ArrayList<Steel>();
+        for (int i = 0; i < steelPosition.length; i++) {
+            steels.add(new Steel(steelPosition[i][1], steelPosition[i][0], 0, 0, 1));
+        }
     }
     
     private void createEnemy(int enemyCount) {
         Random random = new Random();
+        int x;
+        int y;
         for(int i = 0; i < enemyCount; i++) {
-            int x = random.nextInt(size);
-            int y = random.nextInt(size);
+            while (true) {
+                x = random.nextInt(size);
+                y = random.nextInt(size);
+                if (collideCheck(x, y)){
+                    break;
+                }
+            }
             enemies.add(new Enemy(x, y, 0, 0, enemyHealth));
-            enemiesStart.add(new Enemy(x, y, 0, 0, enemyHealth));
         }
     }
 
-    public void start() {
+    public void startpve() {
         player.reset();
         player.setObject(size/2, size/2, 0, 0, 4);
         flag.setObject(12, 24, 0, 0, 1);
-        for(int i = 0; i < enemies.size(); i++) {
-            enemies.get(i).setObject(enemiesStart.get(i).getX(), enemiesStart.get(i).getY(), 0, 0, enemyHealth);
+        for (int j = 0; j < grasses.size(); j++) {
+            grasses.get(j).setObject(grasses.get(j).getX(), grasses.get(j).getY(), 0, 0, 1);
         }
-        for (int j = 0; j < grasses.length; j++) {
-            grasses[j].setObject(grasses[j].getX(), grasses[j].getY(), 0, 0, 1);
+        for (int k = 0; k < bricks.size(); k++) {
+            bricks.get(k).setObject(bricks.get(k).getX(), bricks.get(k).getY(), 0, 0, 1);
         }
-        for (int k = 0; k < bricks.length; k++) {
-            bricks[k].setObject(bricks[k].getX(), bricks[k].getY(), 0, 0, 1);
-        }
-        for (int l = 0; l < steels.length; l++) {
-            steels[l].setObject(steels[l].getX(), steels[l].getY(), 0, 0, 1);
+        for (int l = 0; l < steels.size(); l++) {
+            steels.get(l).setObject(steels.get(l).getX(), steels.get(l).getY(), 0, 0, 1);
         }
         tick = 0;
         notOver = true;
@@ -145,14 +167,13 @@ public class World extends Observable {
                 while (notOver) {
                     tick++;
                     updateBulletDis();
-                    player.move();
-                    moveEnermy();
-                    moveBulletsA(bullets1);
+                    movePlayer(player);
+                    moveEnemy(20, 0);
+                    moveBullets(bullets1);
                     pveBulletHit();
-                    enemyMoveBulletsA();
+                    enemyMoveBullets(5);
                     // bulletHit2();
-                    burstEnemyBullets(tick);
-                    clearBullets();
+                    burstEnemyBullets(20);
                     reducePoolSize();
                     setChanged();
                     notifyObservers();
@@ -162,10 +183,103 @@ public class World extends Observable {
         thread.start();
     }
 
-    private void moveEnermy() {
-        for(int i = 0; i < enemies.size(); i++) {
-            enemies.get(i).moveEnermyA(player.getX(), player.getY(), tick, 1);
+    public void startpvp() {
+        player.reset();
+        player.setObject(size/2, size/2, 0, 0, 4);
+        flag.setObject(12, 24, 0, 0, 1);
+        for (int j = 0; j < grasses.size(); j++) {
+            grasses.get(j).setObject(grasses.get(j).getX(), grasses.get(j).getY(), 0, 0, 1);
         }
+        for (int k = 0; k < bricks.size(); k++) {
+            bricks.get(k).setObject(bricks.get(k).getX(), bricks.get(k).getY(), 0, 0, 1);
+        }
+        for (int l = 0; l < steels.size(); l++) {
+            steels.get(l).setObject(steels.get(l).getX(), steels.get(l).getY(), 0, 0, 1);
+        }
+        tick = 0;
+        notOver = true;
+        thread = new Thread() {
+            @Override
+            public void run() {
+                while (notOver) {
+                    tick++;
+                    updateBulletDis();
+                    movePlayer(player);
+                    moveEnemy(20, 0);
+                    moveBullets(bullets1);
+                    pveBulletHit();
+                    enemyMoveBullets(5);
+                    // bulletHit2();
+                    burstEnemyBullets(20);
+                    reducePoolSize();
+                    setChanged();
+                    notifyObservers();
+                }
+            }
+        };
+        thread.start();
+    }
+
+    private void movePlayer(Player p) {
+        if (collideCheck(p.getX()+p.getdX(), p.getY()+p.getdY())) {
+            p.move();
+        } else {
+            p.resetDis();
+        }
+    }
+
+    private void moveEnemy(int delayed, int offset) {
+        if (tick % delayed == 0) {
+            int playerX = player.getX();
+            int playerY = player.getY();
+            for(Enemy enemy : enemies) {
+                int enemyX = enemy.getX();
+                int enemyY = enemy.getY();
+                int newdX = 0;
+                int newdY = 0;
+                if (enemyX < playerX-offset && enemyY < playerY-offset) {
+                    newdX = 1;
+                    newdY = 1;
+                } else if (enemyX < playerX-offset && enemyY > playerY+offset) {
+                    newdX = 1;
+                    newdY = -1;
+                } else if (enemyX > playerX+offset && enemyY < playerY-offset) {
+                    newdX = -1;
+                    newdY = 1;
+                } else if (enemyX > playerX+offset && enemyY > playerY+offset) {
+                    newdX = -1;
+                    newdY = -1;
+                } else if (enemyX == playerX && enemyY > playerY+offset) {
+                    newdY = -1;
+                } else if (enemyX == playerX && enemyY < playerY-offset) {
+                    newdY = 1;
+                } else if (enemyX > playerX+offset && enemyY == playerY) {
+                    newdX = -1;
+                } else if (enemyX < playerX-offset && enemyY == playerY) {
+                    newdX = 1;
+                }
+                if (collideCheck(enemy.getX()+newdX, enemy.getY()+newdY)) {
+                    enemy.moveEnemy(newdX, newdY);
+                }
+            }
+        }
+    }
+
+    private boolean collideCheck(int x, int y) {
+        if (x <= -1 || x >= size || y <= -1 || y >= size) {
+            return false;
+        }
+        for(Brick brick : bricks) {
+            if (x == brick.getX() && y == brick.getY()) {
+                return false;
+            }
+        }
+        for(Steel steel : steels) {
+            if (x == steel.getX() && y == steel.getY()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void updateBulletDis() {
@@ -177,40 +291,66 @@ public class World extends Observable {
 
     private void pveBulletHit() {
         List<Enemy> toRemoveEnemy = new ArrayList<Enemy>();
+        List<Brick> toRemoveBrick = new ArrayList<Brick>();
         List<Bullet> toRemoveBullet1 = new ArrayList<Bullet>();
         List<Bullet> toRemoveBullet2 = new ArrayList<Bullet>();
+        // player bullets
         for(Bullet b1 : bullets1) {
-            for(Enemy enemy : enemies) {
+            for(Enemy enemy : enemies) { // hit enemy
                 if(b1.hit(enemy)) {
                     enemy.updateHP(-b1.getHP());
                     if(enemy.getHP() == 0) {
                         toRemoveEnemy.add(enemy);
                     }
                     toRemoveBullet1.add(b1);
+                    break;
                 }
             }
-            for(Bullet b2 : bullets2) {
+            for(Bullet b2 : bullets2) { // hit enemy bullet
                 if(b1.hit(b2)) {
                     b2.updateHP(-b1.getHP());
                     if(b2.getHP() == 0) {
                         toRemoveBullet2.add(b2);
                     }
+                    toRemoveBullet1.add(b1);
+                    break;
                 }
             }
+            for(Brick brick : bricks) { // hit brick
+                if(b1.hit(brick)) {
+                    brick.updateHP(-b1.getHP());
+                    if(brick.getHP() == 0) {
+                        toRemoveBrick.add(brick);
+                    }
+                    break;
+                }
+            }
+            if(!collideCheck(b1.getX(), b1.getY())) { // hit brick steel and map border
+                toRemoveBullet1.add(b1);
+                break;
+            }
         }
+        // enemy bullets
         for(Bullet b2 : bullets2) {
-            if(b2.hit(player)) {
+            if(b2.hit(player)) { // hit player
                 player.updateHP(-b2.getHP());
                 if(player.getHP() == 0) {
                     // isGameOver();
                     System.out.println("you are already dead");
                 }
                 toRemoveBullet2.add(b2);
+                break;
+            }
+            if(!collideCheck(b2.getX(), b2.getY())) { // hit brick steel and map border
+                toRemoveBullet2.add(b2);
+                break;
             }
         }
         enemies.removeAll(toRemoveEnemy);
+        bricks.removeAll(toRemoveBrick);
         bullets1.removeAll(toRemoveBullet1);
         bullets2.removeAll(toRemoveBullet2);
+        // next stage
         if(enemies.size() == 0) {
             enemyCount += 2;
             player.updateHP(2);
@@ -223,62 +363,18 @@ public class World extends Observable {
 
     // }
 
-    public void initTrees() {
-        grasses = new Grass[treePosition.length];
-        for (int i = 0; i < treePosition.length; i++) {
-            grasses[i] = new Grass(treePosition[i][1], treePosition[i][0], 0, 0, 1);
-        }
-    }
-
-    public void initBricks() {
-        bricks = new Brick[brickPosition.length];
-        for (int i = 0; i < brickPosition.length; i++) {
-            bricks[i] = new Brick(brickPosition[i][1], brickPosition[i][0], 0, 0, 1);
-        }
-    }
-
-    public void initSteels() {
-        steels = new Steel[steelPosition.length];
-        for (int i = 0; i < steelPosition.length; i++) {
-            steels[i] = new Steel(steelPosition[i][1], steelPosition[i][0], 0, 0, 1);
-        }
-    }
-
-    private void moveBulletsA(List<Bullet> bullets) {
+    private void moveBullets(List<Bullet> bullets) {
         for(Bullet bullet : bullets) {
             bullet.moveBulletA();
         }
     }
 
-    private void enemyMoveBulletsA() {
-        if (tick%5 == 0) {
+    private void enemyMoveBullets(int delayed) {
+        if (tick % delayed == 0) {
             for(Bullet bullet : bullets2) {
                 bullet.moveBulletA();
             }
         }
-    }
-
-    private void clearBullets() {
-        List<Bullet> toRemoveBullet1 = new ArrayList<Bullet>();
-        List<Bullet> toRemoveBullet2 = new ArrayList<Bullet>();
-        for(Bullet b : bullets1) {
-            if (b.getX() <= 0 ||
-                b.getX() >= size ||
-                b.getY() <= 0 ||
-                b.getY() >= size) {
-                toRemoveBullet1.add(b);
-            }
-        }
-        for(Bullet b : bullets2) {
-            if (b.getX() <= 0 ||
-                b.getX() >= size ||
-                b.getY() <= 0 ||
-                b.getY() >= size) {
-                toRemoveBullet2.add(b);
-            }
-        }
-        bullets1.removeAll(toRemoveBullet1);
-        bullets2.removeAll(toRemoveBullet2);
     }
 
     private void reducePoolSize() {
@@ -298,8 +394,8 @@ public class World extends Observable {
         bullets2.add(bulletPool.requestBullet(player.getX(), player.getY(), bulletdX, bulletdY, 1));
     }
 
-    public void burstEnemyBullets(int tick) {
-        if (tick%20 == 0) {
+    public void burstEnemyBullets(int delayed) {
+        if (tick % delayed == 0) {
             int playerX = player.getX();
             int playerY = player.getY();
             for(Enemy e : enemies) {
@@ -377,15 +473,15 @@ public class World extends Observable {
         return !notOver;
     }
 
-    public Grass[] getGrasses() {
+    public List<Grass> getGrasses() {
         return grasses;
     }
 
-    public Brick[] getBricks() {
+    public List<Brick> getBricks() {
         return bricks;
     }
 
-    public Steel[] getSteels() {
+    public List<Steel> getSteels() {
         return steels;
     }
 

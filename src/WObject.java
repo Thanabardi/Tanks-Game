@@ -39,8 +39,12 @@ public abstract class WObject {
     public void move() {
         this.x += dx;
         this.y += dy;
-        dx = 0;
-        dy = 0;
+        resetDis();
+    }
+
+    public void resetDis() {
+        this.dx = 0;
+        this.dy = 0;
     }
 
     public void moveBulletA() {
@@ -48,30 +52,9 @@ public abstract class WObject {
         this.y += this.dy;
     }
 
-    public void moveEnermyA(int disX, int disY, int tick, int offset) {
-        if (tick % 20 == 0) {
-            if (this.x < disX-offset && this.y < disY-offset) {
-                this.x += 1;
-                this.y += 1;
-            } else if (this.x < disX-offset && this.y > disY+offset) {
-                this.x += 1;
-                this.y -= 1;
-            } else if (this.x > disX+offset && this.y < disY-offset) {
-                this.x -= 1;
-                this.y += 1;
-            } else if (this.x > disX+offset && this.y > disY+offset) {
-                this.x -= 1;
-                this.y -= 1;
-            } else if (this.x == disX && this.y > disY+offset) {
-                this.y -= 1;
-            } else if (this.x == disX && this.y < disY-offset) {
-                this.y += 1;
-            } else if (this.x > disX+offset && this.y == disY) {
-                this.x -= 1;
-            } else if (this.x < disX-offset && this.y == disY) {
-                this.x += 1;
-            }
-        }
+    public void moveEnemy(int disX, int disY) {
+        this.x += disX;
+        this.y += disY;
     }
 
     public int getX() {
