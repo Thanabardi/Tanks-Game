@@ -39,22 +39,17 @@ public abstract class WObject {
     public void move() {
         this.x += dx;
         this.y += dy;
-        resetDis();
+        reset();
     }
 
-    public void resetDis() {
-        this.dx = 0;
-        this.dy = 0;
-    }
-
-    public void moveBulletA() {
+    public void moveBullet() {
         this.x += this.dx;
         this.y += this.dy;
     }
 
-    public void moveEnemy(int disX, int disY) {
-        this.x += disX;
-        this.y += disY;
+    public void moveEnemy(int newX, int newY) {
+        this.x = newX;
+        this.y = newY;
     }
 
     public int getX() {

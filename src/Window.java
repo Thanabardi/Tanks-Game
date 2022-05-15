@@ -20,15 +20,14 @@ public class Window extends JFrame implements Observer {
     private Gui gui;
     private int worldSize = 26;
 
-    private List<Integer> keyCode = new ArrayList<Integer>();
-    private List<Integer> keyList = List.of(KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE);
-
-    List<Command> replays = new ArrayList<Command>();
+    private List<Integer> keyCode1 = new ArrayList<Integer>();
+    private List<Integer> keyList1 = List.of(KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE);
+    private List<Integer> keyCode2 = new ArrayList<Integer>();
+    private List<Integer> keyList2 = List.of(KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_ENTER);
 
     public Window() {
         super();
         addKeyListener(new KeyController());
-        // addMouseListener(new MouseController());
         setLayout(new BorderLayout());
         renderer = new Renderer();
         add(renderer, BorderLayout.CENTER);
@@ -36,8 +35,8 @@ public class Window extends JFrame implements Observer {
         add(gui, BorderLayout.SOUTH);
         world = new World(worldSize);
         world.addObserver(this);
-        setSize(size - 9, size + 52);
-//        setResizable(false);
+        setSize(size-4, size + 55);
+        setResizable(false);
         setAlwaysOnTop(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
@@ -45,17 +44,21 @@ public class Window extends JFrame implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         renderer.repaint();
-        gui.updateTick(world.getTick());
-        moveCommand();
+        moveCommand1();
+        moveCommand2();
 
-        for (Command c: replays){
-            if (c.getTick() == world.getTick()){
-                c.execute();
-            }
-        }
         if(world.isGameOver()) {
-            gui.showGameOverLabel();
-            // gui.enableReplayButton();
+            JOptionPane.showMessageDialog(Window.this,
+            "Replay?",
+            "Game Over",
+            JOptionPane.INFORMATION_MESSAGE);
+            world = new World(worldSize);
+            world.addObserver(this);
+            addKeyListener(new KeyController());
+            gui.pveButton.setEnabled(true);
+            gui.pvpButton.setEnabled(true);
+            repaint();
+
         }
         waitFor(delayed);
     }
@@ -93,13 +96,29 @@ public class Window extends JFrame implements Observer {
             paintGrass(g);
             paintBricks(g);
             paintSteel(g);
-            paintPlayer(g);
+            paintPlayer2(g);
+            paintPlayer1(g);
             paintEnemies(g);
+            paintPlayerHP(g);
+            paintStage(g);
         }
 
         private void paintGrids(Graphics g) {
             g.setColor(Color.lightGray);
             g.fillRect(0, 0, size, size);
+        }
+
+        private void paintStage(Graphics g) {
+            g.setColor(Color.black);
+            if(world.getStage()>0){g.drawString("Stage " + world.getStage(), size-80, 20);}
+        }
+
+        private void paintPlayerHP(Graphics g) {
+            int player1HP = world.getPlayer1().getHP();
+            int player2HP = world.getPlayer2().getHP();
+            g.setColor(Color.black);
+            if (player1HP>=0) {g.drawString("Player 1 HP: " + player1HP , 10, 20);}
+            if (player2HP>=0) {g.drawString("Player 2 HP: " + player2HP , 10, 40);}
         }
 
         private void paintGrass(Graphics g) {
@@ -136,11 +155,19 @@ public class Window extends JFrame implements Observer {
             g.drawImage(imageFlag, x * perCell, y * perCell, perCell * 2, perCell * 2, null, null);
         }
 
-        private void paintPlayer(Graphics g) {
+        private void paintPlayer1(Graphics g) {
             int perCell = size/world.getSize();
-            int x = world.getPlayer().getX();
-            int y = world.getPlayer().getY();
+            int x = world.getPlayer1().getX();
+            int y = world.getPlayer1().getY();
             g.setColor(Color.blue);
+            g.fillRect(x * perCell,y * perCell, perCell, perCell);
+        }
+
+        private void paintPlayer2(Graphics g) {
+            int perCell = size/world.getSize();
+            int x = world.getPlayer2().getX();
+            int y = world.getPlayer2().getY();
+            g.setColor(Color.red);
             g.fillRect(x * perCell,y * perCell, perCell, perCell);
         }
 
@@ -177,20 +204,17 @@ public class Window extends JFrame implements Observer {
 
     class Gui extends JPanel {
 
-        private JLabel tickLabel;
         private JButton pveButton;
         private JButton pvpButton;
-        private JLabel gameOverLabel;
 
         public Gui() {
             setLayout(new FlowLayout());
-            tickLabel = new JLabel("Tick: 0");
-            add(tickLabel);
             pvpButton = new JButton("PvP");
             pvpButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     world.startpvp();
+                    pveButton.setEnabled(false);
                     pvpButton.setEnabled(false);
                     Window.this.requestFocus();
                 }
@@ -202,52 +226,36 @@ public class Window extends JFrame implements Observer {
                 public void actionPerformed(ActionEvent e) {
                     world.startpve();
                     pveButton.setEnabled(false);
+                    pvpButton.setEnabled(false);
                     Window.this.requestFocus();
                 }
             });
             add(pveButton);
-            // replayButton = new JButton("Replay");
-            // replayButton.addActionListener(new ActionListener() {
-            //     @Override
-            //     public void actionPerformed(ActionEvent e) {
-            //         world.start();
-            //         replayButton.setEnabled(false);
-            //         Window.this.requestFocus();
-            //     }
-            // });
-            // replayButton.setEnabled(false);
-            // add(replayButton);
-            gameOverLabel = new JLabel("GAME OVER");
-            gameOverLabel.setForeground(Color.red);
-            gameOverLabel.setVisible(false);
-            add(gameOverLabel);
         }
-
-        public void updateTick(int tick) {
-            tickLabel.setText("Tick: " + tick);
-        }
-
-        public void showGameOverLabel() {
-            gameOverLabel.setVisible(true);
-        }
-
-        // public void enableReplayButton() {
-        //     replayButton.setEnabled(true);
-        // }
     }
 
     class KeyController extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            if (keyList.contains(e.getKeyCode()) && !keyCode.contains(e.getKeyCode())) {
-                keyCode.add(e.getKeyCode());
+            if (keyList1.contains(e.getKeyCode()) && !keyCode1.contains(e.getKeyCode())) {
+                keyCode1.add(e.getKeyCode());
+            }
+            if (keyList2.contains(e.getKeyCode()) && !keyCode2.contains(e.getKeyCode())) {
+                keyCode2.add(e.getKeyCode());
             }
         }
 
         public void keyReleased(KeyEvent e) {
-            if(keyCode.contains(e.getKeyCode())) {
-                keyCode.remove(Integer.valueOf(e.getKeyCode()));
+            List<Integer> toRemoveKey1 = new ArrayList<Integer>();
+            List<Integer> toRemoveKey2 = new ArrayList<Integer>();
+            if(keyCode1.contains(e.getKeyCode())) {
+                toRemoveKey1.add(e.getKeyCode());
             }
+            if(keyCode2.contains(e.getKeyCode())) {
+                toRemoveKey2.add(e.getKeyCode());
+            }
+            keyCode1.removeAll(toRemoveKey1);
+            keyCode2.removeAll(toRemoveKey2);
         }
     }
 
@@ -258,27 +266,44 @@ public class Window extends JFrame implements Observer {
     //     }
     // }
 
-    public void moveCommand() {
-        for(Integer key : keyCode) {
+    public void moveCommand1() {
+        for(Integer key : keyCode1) {
             if(key == KeyEvent.VK_W) {
-                Command c = new CommandTurnNorth(world.getPlayer(), world.getTick());
+                Command c = new CommandTurnNorth(world.getPlayer1(), world.getTick());
                 c.execute();
-                replays.add(c);
             } else if(key == KeyEvent.VK_S) {
-                Command c = new CommandTurnSouth(world.getPlayer(), world.getTick());
+                Command c = new CommandTurnSouth(world.getPlayer1(), world.getTick());
                 c.execute();
-                replays.add(c);
             } else if(key == KeyEvent.VK_A) {
-                Command c = new CommandTurnWest(world.getPlayer(), world.getTick());
+                Command c = new CommandTurnWest(world.getPlayer1(), world.getTick());
                 c.execute();
-                replays.add(c);
             } else if(key == KeyEvent.VK_D) {
-                Command c = new CommandTurnEast(world.getPlayer(), world.getTick());
+                Command c = new CommandTurnEast(world.getPlayer1(), world.getTick());
                 c.execute();
-                replays.add(c);
             }
             if(key == KeyEvent.VK_SPACE){
-                world.burstPlayerBullets1();
+                world.burstPlayerBullets1(2);
+            }
+        }
+    }
+
+    public void moveCommand2() {
+        for(Integer key : keyCode2) {
+            if(key == KeyEvent.VK_UP) {
+                Command c = new CommandTurnNorth(world.getPlayer2(), world.getTick());
+                c.execute();
+            } else if(key == KeyEvent.VK_DOWN) {
+                Command c = new CommandTurnSouth(world.getPlayer2(), world.getTick());
+                c.execute();
+            } else if(key == KeyEvent.VK_LEFT) {
+                Command c = new CommandTurnWest(world.getPlayer2(), world.getTick());
+                c.execute();
+            } else if(key == KeyEvent.VK_RIGHT) {
+                Command c = new CommandTurnEast(world.getPlayer2(), world.getTick());
+                c.execute();
+            }
+            if(key == KeyEvent.VK_ENTER){
+                world.burstPlayerBullets2(2);
             }
         }
     }
