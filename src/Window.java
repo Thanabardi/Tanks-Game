@@ -4,8 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+// import java.awt.event.MouseAdapter;
+// import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -14,15 +14,15 @@ import java.util.Observer;
 public class Window extends JFrame implements Observer {
 
     private int size = 800;
-    private long delayed = 100;
+    private long delayed = 100; // game update delay
     private World world;
     private Renderer renderer;
     private Gui gui;
     private int worldSize = 26;
 
     private List<Integer> keyCode1 = new ArrayList<Integer>();
-    private List<Integer> keyList1 = List.of(KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE);
     private List<Integer> keyCode2 = new ArrayList<Integer>();
+    private List<Integer> keyList1 = List.of(KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE);
     private List<Integer> keyList2 = List.of(KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_ENTER);
 
     public Window() {
@@ -108,19 +108,6 @@ public class Window extends JFrame implements Observer {
             g.fillRect(0, 0, size, size);
         }
 
-        private void paintStage(Graphics g) {
-            g.setColor(Color.black);
-            if(world.getStage()>0){g.drawString("Stage " + world.getStage(), size-80, 20);}
-        }
-
-        private void paintPlayerHP(Graphics g) {
-            int player1HP = world.getPlayer1().getHP();
-            int player2HP = world.getPlayer2().getHP();
-            g.setColor(Color.black);
-            if (player1HP>=0) {g.drawString("Player 1 HP: " + player1HP , 10, 20);}
-            if (player2HP>=0) {g.drawString("Player 2 HP: " + player2HP , 10, 40);}
-        }
-
         private void paintGrass(Graphics g) {
             int perCell = size / world.getSize();
             for (Grass grass : world.getGrasses()) {
@@ -199,6 +186,19 @@ public class Window extends JFrame implements Observer {
                 int y = b.getY();
                 g.fillOval(x * perCell+5,y * perCell+5,perCell-10, perCell-10);
             }
+        }
+
+        private void paintStage(Graphics g) {
+            g.setColor(Color.black);
+            if(world.getStage()>0){g.drawString("Stage " + world.getStage(), size-80, 20);}
+        }
+
+        private void paintPlayerHP(Graphics g) {
+            int player1HP = world.getPlayer1().getHP();
+            int player2HP = world.getPlayer2().getHP();
+            g.setColor(Color.black);
+            if (player1HP>=0) {g.drawString("Player 1 HP: " + player1HP , 10, 20);}
+            if (player2HP>=0) {g.drawString("Player 2 HP: " + player2HP , 10, 40);}
         }
     }
 

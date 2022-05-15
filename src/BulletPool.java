@@ -25,10 +25,6 @@ public class BulletPool {
         }
     }
 
-    // public void releaseBullet(Bullet bullet){
-    //     bullets.add(new Bullet(-999, -999, 0, 0, 1));
-    // }
-
     public long getTime() {
         return time;
     }

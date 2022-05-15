@@ -4,16 +4,6 @@ import java.util.List;
 import java.util.Random;
 
 public class World extends Observable {
-
-    private int tick;
-    private int size;
-    private int enemyCount = 4;
-    private int enemyHealth = 2;
-
-    private List<Bullet> bullets1;
-    private List<Bullet> bullets2;
-    private BulletPool bulletPool;
-
     private int[][] treePosition = {
             { 2, 2 }, { 2, 3 }, { 2, 4 }, { 2, 5 },
             { 3, 2 }, { 3, 3 }, { 3, 4 }, { 3, 5 },
@@ -78,11 +68,20 @@ public class World extends Observable {
             { 15, 1 },
             { 17, 10 }, { 17, 11 }
     };
+    private int tick;
+    private int size;
     private int stage = 0;
-    private Player player1;
-    private Player player2;
+    private int enemyCount = 4;
+    private int enemyHealth = 2;
     private Thread thread;
     private boolean notOver;
+
+    private List<Bullet> bullets1;
+    private List<Bullet> bullets2;
+    private BulletPool bulletPool;
+    
+    private Player player1;
+    private Player player2;
     private List<Enemy> enemies;
 
     private int bulletdX1 = 0;
@@ -151,20 +150,10 @@ public class World extends Observable {
         }
     }
 
-    public void startpve() {
+    public void startpve() { // start pve game mode
         stage++;
         player1.setObject(size/2, size/2, 0, 0, 4);
         player2.setObject(-998, -998, 0, 0, -1);
-        flag.setObject(12, 24, 0, 0, 1);
-        for (int j = 0; j < grasses.size(); j++) {
-            grasses.get(j).setObject(grasses.get(j).getX(), grasses.get(j).getY(), 0, 0, 1);
-        }
-        for (int k = 0; k < bricks.size(); k++) {
-            bricks.get(k).setObject(bricks.get(k).getX(), bricks.get(k).getY(), 0, 0, 1);
-        }
-        for (int l = 0; l < steels.size(); l++) {
-            steels.get(l).setObject(steels.get(l).getX(), steels.get(l).getY(), 0, 0, 1);
-        }
         tick = 0;
         notOver = true;
         thread = new Thread() {
@@ -188,22 +177,12 @@ public class World extends Observable {
         thread.start();
     }
 
-    public void startpvp() {
+    public void startpvp() { // start pve game mode
         for(Enemy e : enemies) {
             e.setObject(-997, -997, 0, 0, 1);
         }
         player1.setObject(0, size/2, 0, 0, 100);
         player2.setObject(size-1, size/2, 0, 0, 100);
-        flag.setObject(12, 24, 0, 0, 1);
-        for (int j = 0; j < grasses.size(); j++) {
-            grasses.get(j).setObject(grasses.get(j).getX(), grasses.get(j).getY(), 0, 0, 1);
-        }
-        for (int k = 0; k < bricks.size(); k++) {
-            bricks.get(k).setObject(bricks.get(k).getX(), bricks.get(k).getY(), 0, 0, 1);
-        }
-        for (int l = 0; l < steels.size(); l++) {
-            steels.get(l).setObject(steels.get(l).getX(), steels.get(l).getY(), 0, 0, 1);
-        }
         tick = 0;
         notOver = true;
         thread = new Thread() {
@@ -213,8 +192,8 @@ public class World extends Observable {
                     tick++;
                     moveBullets(bullets1, 1); // move player 1 bullets
                     moveBullets(bullets2, 1); // move player 2 bullets
-                    pvpBulletHit(player1, player2, bullets1, bullets2);
-                    pvpBulletHit(player2, player1, bullets2, bullets1);
+                    pvpBulletHit(player1, player2, bullets1, bullets2); // bullet hit check for player 1
+                    pvpBulletHit(player2, player1, bullets2, bullets1); // bullet hit check for player 2
                     reducePoolSize();
                     updateBulletDis1();
                     updateBulletDis2();
@@ -231,9 +210,8 @@ public class World extends Observable {
     private void movePlayer(Player p) {
         if (collideCheck(p.getX()+p.getdX(), p.getY()+p.getdY())) {
             p.move();
-        } else {
-            p.reset();
         }
+        p.reset();
     }
 
     private void moveEnemy(int delayed, int offset) {
@@ -265,9 +243,9 @@ public class World extends Observable {
                 } else if (enemyX < playerX-offset && enemyY == playerY) {
                     enemyX += 1;
                 }
-                if (collideCheck(enemyX, enemyY)) {
-                    if (enemyX != player1.getX()|| enemyY != player1.getY()) {
-                        for(Enemy e : enemies) {
+                if (collideCheck(enemyX, enemyY)) { // collide brick steel and map border
+                    if (enemyX != player1.getX()|| enemyY != player1.getY()) { // collide player
+                        for(Enemy e : enemies) { // collide other enemy
                             if (enemyX == e.getX() && enemyY == e.getY()) {
                                 move = !move;
                                 break;
@@ -297,14 +275,14 @@ public class World extends Observable {
         return true;
     }
 
-    private void updateBulletDis1() {
+    private void updateBulletDis1() { // set bullet1 direction
         if(player1.getdX() != 0 || player1.getdY() != 0) {
             bulletdX1 = player1.getdX();
             bulletdY1 = player1.getdY();
         }
     }
 
-    private void updateBulletDis2() {
+    private void updateBulletDis2() { // set bullet2 direction
         if(player2.getdX() != 0 || player2.getdY() != 0) {
             bulletdX2 = player2.getdX();
             bulletdY2 = player2.getdY();
@@ -426,7 +404,7 @@ public class World extends Observable {
     private void moveBullets(List<Bullet> bullets, int delayed) {
         if (tick % delayed == 0) {
             for(Bullet bullet : bullets) {
-                bullet.moveBullet();
+                bullet.move();
             }
         }
     }
@@ -487,6 +465,26 @@ public class World extends Observable {
         }
     }
 
+    public Player getPlayer1() {
+        return player1;
+    }
+
+    public Player getPlayer2() {
+        return player2;
+    }
+
+    public List<Bullet> getBullets1() {
+        return bullets1;
+    }
+
+    public List<Bullet> getBullets2() {
+        return bullets2;
+    }
+
+    public List<Enemy> getEnemies() {
+        return enemies;
+    }
+
     public int getTick() {
         return tick;
     }
@@ -497,26 +495,6 @@ public class World extends Observable {
 
     public int getStage() {
         return stage;
-    }
-
-    public Player getPlayer1() {
-        return player1;
-    }
-
-    public Player getPlayer2() {
-        return player2;
-    }
-
-    public List<Enemy> getEnemies() {
-        return enemies;
-    }
-
-    public List<Bullet> getBullets1() {
-        return bullets1;
-    }
-
-    public List<Bullet> getBullets2() {
-        return bullets2;
     }
 
     public boolean isGameOver() {
