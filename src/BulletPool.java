@@ -7,27 +7,27 @@ public class BulletPool {
     public BulletPool(){
         int size = 30;
         for (int i = 0; i < size; i++) {
-            bullets.add(new Bullet(-999, -999, 0, 0));
+            bullets.add(new Bullet(-999, -999, 0, 0, 1));
         }
     }
 
-    public Bullet requestBullet(int x, int y, int dx, int dy){
+    public Bullet requestBullet(int x, int y, int dx, int dy, int hp){
         time = System.currentTimeMillis();
         try {
             Bullet bullet = bullets.remove(0);
-            bullet.setPosition(x, y, dx, dy);
+            bullet.setObject(x, y, dx, dy, hp);
             return bullet;
         } catch (Exception e) {
-            bullets.add(new Bullet(-999, -999, 0, 0));
+            bullets.add(new Bullet(-999, -999, 0, 0, 1));
             Bullet bullet = bullets.remove(0);
-            bullet.setPosition(x, y, dx, dy);
+            bullet.setObject(x, y, dx, dy, hp);
             return bullet;
         }
     }
 
-    public void releaseBullet(Bullet bullet){
-        bullets.add(new Bullet(-999, -999, 0, 0));
-    }
+    // public void releaseBullet(Bullet bullet){
+    //     bullets.add(new Bullet(-999, -999, 0, 0, 1));
+    // }
 
     public long getTime() {
         return time;

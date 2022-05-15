@@ -78,7 +78,8 @@ public class Window extends JFrame implements Observer {
             paintGrids(g);
             paintPlayer(g);
             paintEnemies(g);
-            paintBullets(g);
+            paintBullets1(g);
+            paintBullets2(g);
         }
 
         private void paintGrids(Graphics g) {
@@ -113,10 +114,20 @@ public class Window extends JFrame implements Observer {
             }
         }
 
-        private void paintBullets(Graphics g) {
+        private void paintBullets1(Graphics g) {
             int perCell = size/world.getSize();
             g.setColor(Color.black);
-            for(Bullet b : world.getBullets()) {
+            for(Bullet b : world.getBullets1()) {
+                int x = b.getX();
+                int y = b.getY();
+                g.fillOval(x * perCell+5,y * perCell+5,perCell-10, perCell-10);
+            }
+        }
+
+        private void paintBullets2(Graphics g) {
+            int perCell = size/world.getSize();
+            g.setColor(Color.white);
+            for(Bullet b : world.getBullets2()) {
                 int x = b.getX();
                 int y = b.getY();
                 g.fillOval(x * perCell+5,y * perCell+5,perCell-10, perCell-10);
@@ -217,7 +228,7 @@ public class Window extends JFrame implements Observer {
                 replays.add(c);
             }
             if(key == KeyEvent.VK_SPACE){
-                world.burstBullets();
+                world.burstPlayerBullets1();
             }
         }
     }
