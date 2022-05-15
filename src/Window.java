@@ -18,6 +18,7 @@ public class Window extends JFrame implements Observer {
     private World world;
     private Renderer renderer;
     private Gui gui;
+    private int worldSize = 26;
 
     private List<Integer> keyCode = new ArrayList<Integer>();
     private List<Integer> keyList = List.of(KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE);
@@ -33,9 +34,10 @@ public class Window extends JFrame implements Observer {
         add(renderer, BorderLayout.CENTER);
         gui = new Gui();
         add(gui, BorderLayout.SOUTH);
-        world = new World(25);
+        world = new World(worldSize);
         world.addObserver(this);
-        setSize(size, size);
+        setSize(size - 9, size + 52);
+//        setResizable(false);
         setAlwaysOnTop(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
@@ -67,9 +69,18 @@ public class Window extends JFrame implements Observer {
     }
 
     class Renderer extends JPanel {
+        public final Image imageGrass;
+        public final Image imageBrick;
+        public final Image imageSteel;
+        public final Image imageFlag;
 
         public Renderer() {
             setDoubleBuffered(true);
+
+            imageGrass = new ImageIcon("imgs/grass.jpg").getImage();
+            imageBrick = new ImageIcon("imgs/brick.png").getImage();
+            imageSteel = new ImageIcon("imgs/steel.jpg").getImage();
+            imageFlag = new ImageIcon("imgs/flag.png").getImage();
         }
 
         @Override
@@ -80,28 +91,57 @@ public class Window extends JFrame implements Observer {
             paintEnemies(g);
             paintBullets1(g);
             paintBullets2(g);
+            paintGlass(g);
+            paintBricks(g);
+            paintSteel(g);
+            paintFlag(g);
         }
 
         private void paintGrids(Graphics g) {
-            // Background
             g.setColor(Color.lightGray);
             g.fillRect(0, 0, size, size);
+        }
 
-            // Lines
-            g.setColor(Color.black);
-            int perCell = size/world.getSize();
-            for(int i = 0; i < world.getSize(); i++) {
-                g.drawLine(i * perCell, 0, i * perCell, size);
-                g.drawLine(0, i * perCell, size, i * perCell);
+        private void paintGlass(Graphics g) {
+            int perCell = size / world.getSize();
+            for (Grass grass : world.getGrasses()) {
+                int x = grass.getX();
+                int y = grass.getY();
+                g.drawImage(imageGrass, x * perCell, y * perCell, perCell, perCell, null, null);
             }
+        }
+
+        private void paintBricks(Graphics g) {
+            int perCell = size / world.getSize();
+            for (Brick b : world.getBricks()) {
+                int x = b.getX();
+                int y = b.getY();
+                g.drawImage(imageBrick, x * perCell, y * perCell, perCell, perCell, null, null);
+            }
+        }
+
+        private void paintSteel(Graphics g) {
+            int perCell = size / world.getSize();
+            for (Steel s : world.getSteels()) {
+                int x = s.getX();
+                int y = s.getY();
+                g.drawImage(imageSteel, x * perCell, y * perCell, perCell, perCell, null, null);
+            }
+        }
+
+        private void paintFlag(Graphics g) {
+            int perCell = size / world.getSize();
+            int x = world.getFlag().getX();
+            int y = world.getFlag().getY();
+            g.drawImage(imageFlag, x * perCell, y * perCell, perCell * 2, perCell * 2, null, null);
         }
 
         private void paintPlayer(Graphics g) {
             int perCell = size/world.getSize();
             int x = world.getPlayer().getX();
             int y = world.getPlayer().getY();
-            g.setColor(Color.green);
-            g.fillRect(x * perCell,y * perCell,perCell, perCell);
+            g.setColor(Color.blue);
+            g.fillRect(x * perCell,y * perCell, perCell, perCell);
         }
 
         private void paintEnemies(Graphics g) {

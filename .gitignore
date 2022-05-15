@@ -1,2 +1,6 @@
 settings.json
 bin/
+out/
+
+/shelf/
+/workspace.xml
