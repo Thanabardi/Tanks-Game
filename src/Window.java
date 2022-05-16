@@ -76,14 +76,30 @@ public class Window extends JFrame implements Observer {
         public final Image imageBrick;
         public final Image imageSteel;
         public final Image imageFlag;
+        public final Image imageTankUp;
+        public final Image imageTankDown;
+        public final Image imageTankRight;
+        public final Image imageTankLeft;
+        public final Image imageTank2Up;
+        public final Image imageTank2Down;
+        public final Image imageTank2Right;
+        public final Image imageTank2Left;
 
         public Renderer() {
             setDoubleBuffered(true);
 
-            imageGrass = new ImageIcon("imgs/grass.jpg").getImage();
+            imageGrass = new ImageIcon("imgs/grass.png").getImage();
             imageBrick = new ImageIcon("imgs/brick.png").getImage();
             imageSteel = new ImageIcon("imgs/steel.jpg").getImage();
             imageFlag = new ImageIcon("imgs/flag.png").getImage();
+            imageTankUp = new ImageIcon("imgs/tank-up.png").getImage();
+            imageTankDown = new ImageIcon("imgs/tank-down.png").getImage();
+            imageTankRight = new ImageIcon("imgs/tank-right.png").getImage();
+            imageTankLeft = new ImageIcon("imgs/tank-left.png").getImage();
+            imageTank2Up = new ImageIcon("imgs/tank2-up.png").getImage();
+            imageTank2Down = new ImageIcon("imgs/tank2-down.png").getImage();
+            imageTank2Right = new ImageIcon("imgs/tank2-right.png").getImage();
+            imageTank2Left = new ImageIcon("imgs/tank2-left.png").getImage();
         }
 
         @Override
@@ -91,20 +107,20 @@ public class Window extends JFrame implements Observer {
             super.paint(g);
             paintGrids(g);
             paintFlag(g);
-            paintBullets1(g);
-            paintBullets2(g);
-            paintGrass(g);
             paintBricks(g);
             paintSteel(g);
-            paintPlayer2(g);
-            paintPlayer1(g);
             paintEnemies(g);
             paintPlayerHP(g);
             paintStage(g);
+            paintBullets1(g);
+            paintBullets2(g);
+            paintPlayer1(g);
+            paintPlayer2(g);
+            paintGrass(g);
         }
 
         private void paintGrids(Graphics g) {
-            g.setColor(Color.lightGray);
+            g.setColor(Color.black);
             g.fillRect(0, 0, size, size);
         }
 
@@ -146,16 +162,41 @@ public class Window extends JFrame implements Observer {
             int perCell = size/world.getSize();
             int x = world.getPlayer1().getX();
             int y = world.getPlayer1().getY();
-            g.setColor(Color.blue);
-            g.fillRect(x * perCell,y * perCell, perCell, perCell);
+            switch (world.getPlayer1().getDirection()) {
+                case "NORTH":
+                    g.drawImage(imageTankUp, x * perCell, y * perCell, perCell, perCell, null, null);
+                    break;
+                case "SOUTH":
+                    g.drawImage(imageTankDown, x * perCell, y * perCell, perCell , perCell, null, null);
+                    break;
+                case "EAST":
+                    g.drawImage(imageTankRight, x * perCell, y * perCell, perCell , perCell, null, null);
+                    break;
+                case "WEST":
+                    g.drawImage(imageTankLeft, x * perCell, y * perCell, perCell , perCell, null, null);
+                    break;
+            }
         }
 
         private void paintPlayer2(Graphics g) {
             int perCell = size/world.getSize();
             int x = world.getPlayer2().getX();
             int y = world.getPlayer2().getY();
-            g.setColor(Color.red);
-            g.fillRect(x * perCell,y * perCell, perCell, perCell);
+            g.drawImage(imageTankUp, x * perCell, y * perCell, perCell, perCell, null, null);
+            switch (world.getPlayer2().getDirection()) {
+                case "NORTH":
+                    g.drawImage(imageTank2Up, x * perCell, y * perCell, perCell, perCell, null, null);
+                    break;
+                case "SOUTH":
+                    g.drawImage(imageTank2Down, x * perCell, y * perCell, perCell , perCell, null, null);
+                    break;
+                case "EAST":
+                    g.drawImage(imageTank2Right, x * perCell, y * perCell, perCell , perCell, null, null);
+                    break;
+                case "WEST":
+                    g.drawImage(imageTank2Left, x * perCell, y * perCell, perCell , perCell, null, null);
+                    break;
+            }
         }
 
         private void paintEnemies(Graphics g) {
@@ -174,7 +215,7 @@ public class Window extends JFrame implements Observer {
             for(Bullet b : world.getBullets1()) {
                 int x = b.getX();
                 int y = b.getY();
-                g.fillOval(x * perCell+5,y * perCell+5,perCell-10, perCell-10);
+                g.fillOval(x * perCell+10,y * perCell+10,perCell-20, perCell-20);
             }
         }
 
@@ -184,7 +225,7 @@ public class Window extends JFrame implements Observer {
             for(Bullet b : world.getBullets2()) {
                 int x = b.getX();
                 int y = b.getY();
-                g.fillOval(x * perCell+5,y * perCell+5,perCell-10, perCell-10);
+                g.fillOval(x * perCell+10,y * perCell+10,perCell-20, perCell-20);
             }
         }
 

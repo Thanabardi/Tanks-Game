@@ -6,6 +6,7 @@ public abstract class WObject {
     private int dx;
     private int dy;
 
+    private String direction;
     private int hp; // hp for objects, dmg for bullets
 
     public WObject() {
@@ -17,22 +18,27 @@ public abstract class WObject {
         this.dx = dx;
         this.dy = dy;
         this.hp = hp;
+        this.direction = "NORTH";
     }
 
     public void turnNorth() {
         dy = -1;
+        direction = "NORTH";
     }
 
     public void turnSouth() {
         dy = 1;
+        direction = "SOUTH";
     }
 
     public void turnWest() {
         dx = -1;
+        direction = "WEST";
     }
 
     public void turnEast() {
         dx = 1;
+        direction = "EAST";
     }
 
     public void move() {
@@ -83,5 +89,9 @@ public abstract class WObject {
 
     public void reset() {
         dx = dy = 0;
+    }
+
+    public String getDirection() {
+        return direction;
     }
 }
