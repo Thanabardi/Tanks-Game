@@ -6,6 +6,9 @@ import java.util.Random;
 public class World extends Observable {
     private int tick;
     private int size;
+    private Thread thread;
+    private boolean notOver;
+
     private int stage = 0;
     private int enemyCount;
     private int enemyHealth;
@@ -13,36 +16,27 @@ public class World extends Observable {
     private int playerHealthPvE;
     private int enemyNumGain;
     private int playerHpGain;
-    private Thread thread;
-    private boolean notOver;
 
     private List<Bullet> bullets1;
     private List<Bullet> bullets2;
+    private int [] bulletd = {0,-1,0,-1}; // direction of bullet1(0,1) and bullet2(2,3)
     private BulletPool bulletPool;
     
     private Player player1;
     private Player player2;
     private List<Enemy> enemies;
 
-    private int bulletdX1 = 0;
-    private int bulletdY1 = -1;
-    private int bulletdX2 = 0;
-    private int bulletdY2 = -1;
-
     private List<Grass> grasses;
     private List<Brick> bricks;
     private List<Steel> steels;
     private Flag flag;
-    private int[][] treePosition;
-    private int[][] brickPosition;
-    private int[][] steelPosition;
 
     public World(int size) {
         Config config = new Config();
 
-        treePosition = config.treePosition;
-        brickPosition = config.brickPosition;
-        steelPosition = config.steelPosition;
+        int[][] treePosition = config.treePosition;
+        int[][] brickPosition = config.brickPosition;
+        int[][] steelPosition = config.steelPosition;
 
         enemyCount = config.initEnemyCount;
         enemyHealth = config.initEnemyHealth;
@@ -53,37 +47,35 @@ public class World extends Observable {
 
         this.size = size;
         tick = 0;
+
         flag = new Flag(12, 24);
-        
         player1 = new Player(size/2, size/2);
         player2 = new Player(size/2, size/2);
-        enemies = new ArrayList<Enemy>();
-
+        bulletPool = new BulletPool();
         bullets1 = new ArrayList<Bullet>();
         bullets2 = new ArrayList<Bullet>();
-        bulletPool = new BulletPool();
 
-        initTrees();
-        initBricks();
-        initSteels();
+        createTrees(treePosition);
+        createBricks(brickPosition);
+        createSteels(steelPosition);
         createEnemy(enemyCount);
     }
 
-    public void initTrees() {
+    private void createTrees(int[][] treePosition) {
         grasses = new ArrayList<Grass>();
         for (int i = 0; i < treePosition.length; i++) {
             grasses.add(new Grass(treePosition[i][1], treePosition[i][0]));
         }
     }
 
-    public void initBricks() {
+    private void createBricks(int[][] brickPosition) {
         bricks = new ArrayList<Brick>();
         for (int i = 0; i < brickPosition.length; i++) {
             bricks.add(new Brick(brickPosition[i][1], brickPosition[i][0]));
         }
     }
 
-    public void initSteels() {
+    private void createSteels(int[][] steelPosition) {
         steels = new ArrayList<Steel>();
         for (int i = 0; i < steelPosition.length; i++) {
             steels.add(new Steel(steelPosition[i][1], steelPosition[i][0]));
@@ -92,6 +84,7 @@ public class World extends Observable {
     
     private void createEnemy(int enemyCount) {
         Random random = new Random();
+        enemies = new ArrayList<Enemy>();
         int x;
         int y;
         for(int i = 0; i < enemyCount; i++) {
@@ -234,15 +227,15 @@ public class World extends Observable {
 
     private void updateBulletDis1() { // set bullet1 direction
         if(player1.getdX() != 0 || player1.getdY() != 0) {
-            bulletdX1 = player1.getdX();
-            bulletdY1 = player1.getdY();
+            bulletd[0] = player1.getdX();
+            bulletd[1] = player1.getdY();
         }
     }
 
     private void updateBulletDis2() { // set bullet2 direction
         if(player2.getdX() != 0 || player2.getdY() != 0) {
-            bulletdX2 = player2.getdX();
-            bulletdY2 = player2.getdY();
+            bulletd[2] = player2.getdX();
+            bulletd[3] = player2.getdY();
         }
     }
 
@@ -371,17 +364,17 @@ public class World extends Observable {
 
     public void burstPlayerBullets1(int delayed) {
         if (tick % delayed == 0) {
-            bullets1.add(bulletPool.requestBullet(player1.getX(), player1.getY(), bulletdX1, bulletdY1, 1));
+            bullets1.add(bulletPool.requestBullet(player1.getX(), player1.getY(), bulletd[0], bulletd[1], 1));
         }
     }
 
     public void burstPlayerBullets2(int delayed) {
         if (tick % delayed == 0) {
-            bullets2.add(bulletPool.requestBullet(player2.getX(), player2.getY(), bulletdX2, bulletdY2, 1));
+            bullets2.add(bulletPool.requestBullet(player2.getX(), player2.getY(), bulletd[2], bulletd[3], 1));
         }
     }
 
-    public void burstEnemyBullets(int delayed) {
+    private void burstEnemyBullets(int delayed) {
         if (tick % delayed == 0) {
             int playerX = player1.getX();
             int playerY = player1.getY();
