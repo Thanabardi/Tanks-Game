@@ -6,18 +6,13 @@ public abstract class WObject {
     private int dx;
     private int dy;
 
-    private String direction;
     private int hp; // hp for objects, dmg for bullets
+    private String direction;
 
-    public WObject() {
-    }
-
-    public WObject(int x, int y, int dx, int dy, int hp) {
+    public WObject(int x, int y) {
         this.x = x;
         this.y = y;
-        this.dx = dx;
-        this.dy = dy;
-        this.hp = hp;
+        this.hp = -1;
         this.direction = "NORTH";
     }
 
@@ -67,6 +62,10 @@ public abstract class WObject {
         this.hp += value;
     }
 
+    public void reset() {
+        dx = dy = 0;
+    }    
+
     public int getX() {
         return x;
     }
@@ -85,10 +84,6 @@ public abstract class WObject {
 
     public int getHP() {
         return hp;
-    }
-
-    public void reset() {
-        dx = dy = 0;
     }
 
     public String getDirection() {

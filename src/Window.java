@@ -20,10 +20,9 @@ public class Window extends JFrame implements Observer {
     private Gui gui;
     private int worldSize = 26;
 
-    private List<Integer> keyCode1 = new ArrayList<Integer>();
-    private List<Integer> keyCode2 = new ArrayList<Integer>();
-    private List<Integer> keyList1 = List.of(KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE);
-    private List<Integer> keyList2 = List.of(KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_ENTER);
+    private List<Integer> keyCode = new ArrayList<Integer>();
+    private List<Integer> keyList = List.of(KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE,
+                                            KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_ENTER);
 
     public Window() {
         super();
@@ -44,8 +43,7 @@ public class Window extends JFrame implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         renderer.repaint();
-        moveCommand1();
-        moveCommand2();
+        moveCommand();
 
         if(world.isGameOver()) {
             JOptionPane.showMessageDialog(Window.this,
@@ -76,14 +74,15 @@ public class Window extends JFrame implements Observer {
         public final Image imageBrick;
         public final Image imageSteel;
         public final Image imageFlag;
-        public final Image imageTankUp;
-        public final Image imageTankDown;
-        public final Image imageTankRight;
-        public final Image imageTankLeft;
+        public final Image imageTank1Up;
+        public final Image imageTank1Down;
+        public final Image imageTank1Right;
+        public final Image imageTank1Left;
         public final Image imageTank2Up;
         public final Image imageTank2Down;
         public final Image imageTank2Right;
         public final Image imageTank2Left;
+        public final Image imageEnemy;
 
         public Renderer() {
             setDoubleBuffered(true);
@@ -92,14 +91,15 @@ public class Window extends JFrame implements Observer {
             imageBrick = new ImageIcon("imgs/brick.png").getImage();
             imageSteel = new ImageIcon("imgs/steel.jpg").getImage();
             imageFlag = new ImageIcon("imgs/flag.png").getImage();
-            imageTankUp = new ImageIcon("imgs/tank-up.png").getImage();
-            imageTankDown = new ImageIcon("imgs/tank-down.png").getImage();
-            imageTankRight = new ImageIcon("imgs/tank-right.png").getImage();
-            imageTankLeft = new ImageIcon("imgs/tank-left.png").getImage();
+            imageTank1Up = new ImageIcon("imgs/tank-up.png").getImage();
+            imageTank1Down = new ImageIcon("imgs/tank-down.png").getImage();
+            imageTank1Right = new ImageIcon("imgs/tank-right.png").getImage();
+            imageTank1Left = new ImageIcon("imgs/tank-left.png").getImage();
             imageTank2Up = new ImageIcon("imgs/tank2-up.png").getImage();
             imageTank2Down = new ImageIcon("imgs/tank2-down.png").getImage();
             imageTank2Right = new ImageIcon("imgs/tank2-right.png").getImage();
             imageTank2Left = new ImageIcon("imgs/tank2-left.png").getImage();
+            imageEnemy = new ImageIcon("imgs/enemy.png").getImage();
         }
 
         @Override
@@ -107,16 +107,16 @@ public class Window extends JFrame implements Observer {
             super.paint(g);
             paintGrids(g);
             paintFlag(g);
-            paintBricks(g);
-            paintSteel(g);
-            paintEnemies(g);
-            paintPlayerHP(g);
-            paintStage(g);
             paintBullets1(g);
             paintBullets2(g);
-            paintPlayer1(g);
+            paintBricks(g);
+            paintSteels(g);
+            paintEnemies(g);
             paintPlayer2(g);
+            paintPlayer1(g);
             paintGrass(g);
+            paintPlayerHP(g);
+            paintStage(g);
         }
 
         private void paintGrids(Graphics g) {
@@ -142,7 +142,7 @@ public class Window extends JFrame implements Observer {
             }
         }
 
-        private void paintSteel(Graphics g) {
+        private void paintSteels(Graphics g) {
             int perCell = size / world.getSize();
             for (Steel s : world.getSteels()) {
                 int x = s.getX();
@@ -164,16 +164,16 @@ public class Window extends JFrame implements Observer {
             int y = world.getPlayer1().getY();
             switch (world.getPlayer1().getDirection()) {
                 case "NORTH":
-                    g.drawImage(imageTankUp, x * perCell, y * perCell, perCell, perCell, null, null);
+                    g.drawImage(imageTank1Up, x * perCell, y * perCell, perCell, perCell, null, null);
                     break;
                 case "SOUTH":
-                    g.drawImage(imageTankDown, x * perCell, y * perCell, perCell , perCell, null, null);
+                    g.drawImage(imageTank1Down, x * perCell, y * perCell, perCell , perCell, null, null);
                     break;
                 case "EAST":
-                    g.drawImage(imageTankRight, x * perCell, y * perCell, perCell , perCell, null, null);
+                    g.drawImage(imageTank1Right, x * perCell, y * perCell, perCell , perCell, null, null);
                     break;
                 case "WEST":
-                    g.drawImage(imageTankLeft, x * perCell, y * perCell, perCell , perCell, null, null);
+                    g.drawImage(imageTank1Left, x * perCell, y * perCell, perCell , perCell, null, null);
                     break;
             }
         }
@@ -182,7 +182,6 @@ public class Window extends JFrame implements Observer {
             int perCell = size/world.getSize();
             int x = world.getPlayer2().getX();
             int y = world.getPlayer2().getY();
-            g.drawImage(imageTankUp, x * perCell, y * perCell, perCell, perCell, null, null);
             switch (world.getPlayer2().getDirection()) {
                 case "NORTH":
                     g.drawImage(imageTank2Up, x * perCell, y * perCell, perCell, perCell, null, null);
@@ -201,17 +200,16 @@ public class Window extends JFrame implements Observer {
 
         private void paintEnemies(Graphics g) {
             int perCell = size/world.getSize();
-            g.setColor(Color.red);
             for(Enemy e : world.getEnemies()) {
                 int x = e.getX();
                 int y = e.getY();
-                g.fillRect(x * perCell,y * perCell,perCell, perCell);
+                g.drawImage(imageEnemy, x * perCell, y * perCell, perCell, perCell, null, null);
             }
         }
 
         private void paintBullets1(Graphics g) {
             int perCell = size/world.getSize();
-            g.setColor(Color.black);
+            g.setColor(Color.orange);
             for(Bullet b : world.getBullets1()) {
                 int x = b.getX();
                 int y = b.getY();
@@ -221,7 +219,7 @@ public class Window extends JFrame implements Observer {
 
         private void paintBullets2(Graphics g) {
             int perCell = size/world.getSize();
-            g.setColor(Color.white);
+            g.setColor(Color.red);
             for(Bullet b : world.getBullets2()) {
                 int x = b.getX();
                 int y = b.getY();
@@ -230,14 +228,14 @@ public class Window extends JFrame implements Observer {
         }
 
         private void paintStage(Graphics g) {
-            g.setColor(Color.black);
+            g.setColor(Color.white);
             if(world.getStage()>0){g.drawString("Stage " + world.getStage(), size-80, 20);}
         }
 
         private void paintPlayerHP(Graphics g) {
             int player1HP = world.getPlayer1().getHP();
             int player2HP = world.getPlayer2().getHP();
-            g.setColor(Color.black);
+            g.setColor(Color.white);
             if (player1HP>=0) {g.drawString("Player 1 HP: " + player1HP , 10, 20);}
             if (player2HP>=0) {g.drawString("Player 2 HP: " + player2HP , 10, 40);}
         }
@@ -278,25 +276,17 @@ public class Window extends JFrame implements Observer {
     class KeyController extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            if (keyList1.contains(e.getKeyCode()) && !keyCode1.contains(e.getKeyCode())) {
-                keyCode1.add(e.getKeyCode());
-            }
-            if (keyList2.contains(e.getKeyCode()) && !keyCode2.contains(e.getKeyCode())) {
-                keyCode2.add(e.getKeyCode());
+            if (keyList.contains(e.getKeyCode()) && !keyCode.contains(e.getKeyCode())) {
+                keyCode.add(e.getKeyCode());
             }
         }
-
+        @Override
         public void keyReleased(KeyEvent e) {
-            List<Integer> toRemoveKey1 = new ArrayList<Integer>();
-            List<Integer> toRemoveKey2 = new ArrayList<Integer>();
-            if(keyCode1.contains(e.getKeyCode())) {
-                toRemoveKey1.add(e.getKeyCode());
+            List<Integer> toRemoveKey = new ArrayList<Integer>();
+            if(keyCode.contains(e.getKeyCode())) {
+                toRemoveKey.add(e.getKeyCode());
             }
-            if(keyCode2.contains(e.getKeyCode())) {
-                toRemoveKey2.add(e.getKeyCode());
-            }
-            keyCode1.removeAll(toRemoveKey1);
-            keyCode2.removeAll(toRemoveKey2);
+            keyCode.removeAll(toRemoveKey);
         }
     }
 
@@ -307,8 +297,8 @@ public class Window extends JFrame implements Observer {
     //     }
     // }
 
-    public void moveCommand1() {
-        for(Integer key : keyCode1) {
+    private void moveCommand() {
+        for(Integer key : keyCode) {
             if(key == KeyEvent.VK_W) {
                 Command c = new CommandTurnNorth(world.getPlayer1(), world.getTick());
                 c.execute();
@@ -321,16 +311,9 @@ public class Window extends JFrame implements Observer {
             } else if(key == KeyEvent.VK_D) {
                 Command c = new CommandTurnEast(world.getPlayer1(), world.getTick());
                 c.execute();
-            }
-            if(key == KeyEvent.VK_SPACE){
+            } else if(key == KeyEvent.VK_SPACE){
                 world.burstPlayerBullets1(2);
-            }
-        }
-    }
-
-    public void moveCommand2() {
-        for(Integer key : keyCode2) {
-            if(key == KeyEvent.VK_UP) {
+            } else if(key == KeyEvent.VK_UP) {
                 Command c = new CommandTurnNorth(world.getPlayer2(), world.getTick());
                 c.execute();
             } else if(key == KeyEvent.VK_DOWN) {
@@ -342,8 +325,7 @@ public class Window extends JFrame implements Observer {
             } else if(key == KeyEvent.VK_RIGHT) {
                 Command c = new CommandTurnEast(world.getPlayer2(), world.getTick());
                 c.execute();
-            }
-            if(key == KeyEvent.VK_ENTER){
+            }else if(key == KeyEvent.VK_ENTER){
                 world.burstPlayerBullets2(2);
             }
         }
