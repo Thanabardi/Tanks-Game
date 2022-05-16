@@ -20,10 +20,9 @@ public class Window extends JFrame implements Observer {
     private Gui gui;
     private int worldSize = 26;
 
-    private List<Integer> keyCode1 = new ArrayList<Integer>();
-    private List<Integer> keyCode2 = new ArrayList<Integer>();
-    private List<Integer> keyList1 = List.of(KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE);
-    private List<Integer> keyList2 = List.of(KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_ENTER);
+    private List<Integer> keyCode = new ArrayList<Integer>();
+    private List<Integer> keyList = List.of(KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE,
+                                            KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_ENTER);
 
     public Window() {
         super();
@@ -44,8 +43,7 @@ public class Window extends JFrame implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         renderer.repaint();
-        moveCommand1();
-        moveCommand2();
+        moveCommand();
 
         if(world.isGameOver()) {
             JOptionPane.showMessageDialog(Window.this,
@@ -95,7 +93,7 @@ public class Window extends JFrame implements Observer {
             paintBullets2(g);
             paintGrass(g);
             paintBricks(g);
-            paintSteel(g);
+            paintSteels(g);
             paintPlayer2(g);
             paintPlayer1(g);
             paintEnemies(g);
@@ -126,7 +124,7 @@ public class Window extends JFrame implements Observer {
             }
         }
 
-        private void paintSteel(Graphics g) {
+        private void paintSteels(Graphics g) {
             int perCell = size / world.getSize();
             for (Steel s : world.getSteels()) {
                 int x = s.getX();
@@ -237,25 +235,17 @@ public class Window extends JFrame implements Observer {
     class KeyController extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            if (keyList1.contains(e.getKeyCode()) && !keyCode1.contains(e.getKeyCode())) {
-                keyCode1.add(e.getKeyCode());
-            }
-            if (keyList2.contains(e.getKeyCode()) && !keyCode2.contains(e.getKeyCode())) {
-                keyCode2.add(e.getKeyCode());
+            if (keyList.contains(e.getKeyCode()) && !keyCode.contains(e.getKeyCode())) {
+                keyCode.add(e.getKeyCode());
             }
         }
-
+        @Override
         public void keyReleased(KeyEvent e) {
-            List<Integer> toRemoveKey1 = new ArrayList<Integer>();
-            List<Integer> toRemoveKey2 = new ArrayList<Integer>();
-            if(keyCode1.contains(e.getKeyCode())) {
-                toRemoveKey1.add(e.getKeyCode());
+            List<Integer> toRemoveKey = new ArrayList<Integer>();
+            if(keyCode.contains(e.getKeyCode())) {
+                toRemoveKey.add(e.getKeyCode());
             }
-            if(keyCode2.contains(e.getKeyCode())) {
-                toRemoveKey2.add(e.getKeyCode());
-            }
-            keyCode1.removeAll(toRemoveKey1);
-            keyCode2.removeAll(toRemoveKey2);
+            keyCode.removeAll(toRemoveKey);
         }
     }
 
@@ -266,8 +256,8 @@ public class Window extends JFrame implements Observer {
     //     }
     // }
 
-    public void moveCommand1() {
-        for(Integer key : keyCode1) {
+    private void moveCommand() {
+        for(Integer key : keyCode) {
             if(key == KeyEvent.VK_W) {
                 Command c = new CommandTurnNorth(world.getPlayer1(), world.getTick());
                 c.execute();
@@ -280,16 +270,9 @@ public class Window extends JFrame implements Observer {
             } else if(key == KeyEvent.VK_D) {
                 Command c = new CommandTurnEast(world.getPlayer1(), world.getTick());
                 c.execute();
-            }
-            if(key == KeyEvent.VK_SPACE){
+            } else if(key == KeyEvent.VK_SPACE){
                 world.burstPlayerBullets1(2);
-            }
-        }
-    }
-
-    public void moveCommand2() {
-        for(Integer key : keyCode2) {
-            if(key == KeyEvent.VK_UP) {
+            } else if(key == KeyEvent.VK_UP) {
                 Command c = new CommandTurnNorth(world.getPlayer2(), world.getTick());
                 c.execute();
             } else if(key == KeyEvent.VK_DOWN) {
@@ -301,8 +284,7 @@ public class Window extends JFrame implements Observer {
             } else if(key == KeyEvent.VK_RIGHT) {
                 Command c = new CommandTurnEast(world.getPlayer2(), world.getTick());
                 c.execute();
-            }
-            if(key == KeyEvent.VK_ENTER){
+            }else if(key == KeyEvent.VK_ENTER){
                 world.burstPlayerBullets2(2);
             }
         }
