@@ -8,15 +8,10 @@ public abstract class WObject {
 
     private int hp; // hp for objects, dmg for bullets
 
-    public WObject() {
-    }
-
-    public WObject(int x, int y, int dx, int dy, int hp) {
+    public WObject(int x, int y) {
         this.x = x;
         this.y = y;
-        this.dx = dx;
-        this.dy = dy;
-        this.hp = hp;
+        this.hp = -1;
     }
 
     public void turnNorth() {

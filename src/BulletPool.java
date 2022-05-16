@@ -7,7 +7,7 @@ public class BulletPool {
     public BulletPool(){
         int size = 30;
         for (int i = 0; i < size; i++) {
-            bullets.add(new Bullet(-999, -999, 0, 0, 1));
+            bullets.add(new Bullet(-999, -999));
         }
     }
 
@@ -18,7 +18,7 @@ public class BulletPool {
             bullet.setObject(x, y, dx, dy, hp);
             return bullet;
         } catch (Exception e) {
-            bullets.add(new Bullet(-999, -999, 0, 0, 1));
+            bullets.add(new Bullet(-999, -999));
             Bullet bullet = bullets.remove(0);
             bullet.setObject(x, y, dx, dy, hp);
             return bullet;
