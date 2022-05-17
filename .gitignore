@@ -1,6 +1,6 @@
 settings.json
 bin/
 out/
-
+.idea/
 /shelf/
 /workspace.xml
